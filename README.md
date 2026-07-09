@@ -29,6 +29,17 @@ Open [index.html](index.html) in a browser.
 
 No installation or build step is required.
 
+## Deploy to Vercel
+
+This project is already set up as a static site and can be deployed to Vercel without a build step.
+
+1. Push the repository to GitHub.
+2. Import the repository in Vercel.
+3. Choose the root folder of the project.
+4. Vercel will serve the static files automatically.
+
+If you want to deploy manually, the project files are ready to be served directly from the root folder.
+
 ## Project structure
 
 - [index.html](index.html) — complete app UI, styling, and game logic
