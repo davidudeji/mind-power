@@ -1,0 +1,1730 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NeuroForge Suite</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #060816;
+        --surface: #101626;
+        --surface-strong: #161d30;
+        --text: #f6f7ff;
+        --muted: #8ea0c4;
+        --accent: #7c8cff;
+        --accent-2: #2dd4bf;
+        --accent-3: #f5b23c;
+        --error: #ef4444;
+        --border: rgba(221, 231, 255, 0.16);
+        --shadow: 0 24px 90px rgba(2, 8, 23, 0.48);
+        --display-font: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+        font-family: Inter, "Segoe UI", system-ui, sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          radial-gradient(
+            circle at top left,
+            rgba(124, 140, 255, 0.24),
+            transparent 24%
+          ),
+          radial-gradient(
+            circle at bottom right,
+            rgba(45, 212, 191, 0.16),
+            transparent 24%
+          ),
+          linear-gradient(135deg, #080b16 0%, #060816 50%, #0b1122 100%);
+        color: var(--text);
+        position: relative;
+        overflow-x: hidden;
+      }
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(124, 140, 255, 0.07) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(124, 140, 255, 0.07) 1px, transparent 1px);
+        background-size: 44px 44px;
+        mask-image: linear-gradient(
+          180deg,
+          rgba(0, 0, 0, 0.8),
+          transparent 92%
+        );
+        opacity: 0.5;
+      }
+      button,
+      input {
+        font: inherit;
+      }
+      button:focus-visible,
+      input:focus-visible {
+        outline: 2px solid rgba(124, 140, 255, 0.8);
+        outline-offset: 2px;
+      }
+      .app-shell {
+        max-width: 1340px;
+        margin: 0 auto;
+        padding: 28px;
+        display: grid;
+        gap: 24px;
+      }
+      .topbar {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 18px;
+        align-items: stretch;
+      }
+      .status-panel {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(120px, 1fr));
+        gap: 14px;
+      }
+      .stat-card {
+        background: linear-gradient(
+          145deg,
+          rgba(255, 255, 255, 0.06),
+          rgba(16, 22, 38, 0.92)
+        );
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 16px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-height: 108px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      }
+      .stat-card strong {
+        font-size: 0.76rem;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .stat-card span {
+        font-size: 1.4rem;
+        line-height: 1.2;
+        font-weight: 600;
+      }
+      .progress-wrapper {
+        position: relative;
+        width: 100%;
+        height: 12px;
+        border-radius: 999px;
+        background: rgba(124, 140, 255, 0.12);
+        overflow: hidden;
+        margin-top: 8px;
+      }
+      .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--accent), var(--accent-2));
+        transition: width 0.5s ease;
+        box-shadow: 0 0 18px rgba(45, 212, 191, 0.3);
+      }
+      .header-brand {
+        display: grid;
+        gap: 10px;
+        align-items: start;
+        justify-items: end;
+        text-align: right;
+        padding: 18px 22px;
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        background: linear-gradient(
+          145deg,
+          rgba(124, 140, 255, 0.12),
+          rgba(255, 255, 255, 0.03)
+        );
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      }
+      .eyebrow {
+        display: inline-flex;
+        width: fit-content;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.2em;
+        color: var(--accent-2);
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: rgba(45, 212, 191, 0.12);
+        border: 1px solid rgba(45, 212, 191, 0.2);
+      }
+      .header-brand h1 {
+        margin: 0;
+        font-size: 1.7rem;
+        letter-spacing: 0.02em;
+        font-family: var(--display-font);
+        font-weight: 600;
+      }
+      .header-brand p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.96rem;
+        max-width: 360px;
+      }
+      .main-panel {
+        display: grid;
+        gap: 24px;
+        background: linear-gradient(
+          145deg,
+          rgba(16, 22, 38, 0.95),
+          rgba(8, 12, 24, 0.96)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 34px;
+        padding: 24px;
+        box-shadow: var(--shadow);
+        position: relative;
+        overflow: hidden;
+      }
+      .main-panel::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(124, 140, 255, 0.12),
+          transparent 35%,
+          rgba(45, 212, 191, 0.08)
+        );
+        pointer-events: none;
+      }
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+        position: relative;
+        z-index: 1;
+      }
+      .game-card {
+        background: linear-gradient(
+          145deg,
+          rgba(124, 140, 255, 0.12),
+          rgba(255, 255, 255, 0.03)
+        );
+        border: 1px solid var(--border);
+        border-radius: 28px;
+        padding: 22px;
+        display: grid;
+        gap: 14px;
+        min-height: 230px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      }
+      .game-card[data-focus="true"] {
+        border-color: rgba(45, 212, 191, 0.5);
+        box-shadow:
+          0 0 0 1px rgba(45, 212, 191, 0.16),
+          inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      }
+      .game-card h2 {
+        margin: 0;
+        font-size: 1.16rem;
+        font-family: var(--display-font);
+      }
+      .game-card p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.55;
+      }
+      .game-card .high-score {
+        display: grid;
+        gap: 6px;
+        color: var(--text);
+        font-size: 0.95rem;
+      }
+      .game-card button {
+        margin-top: auto;
+        width: 100%;
+        padding: 14px 18px;
+        border: none;
+        border-radius: 18px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: white;
+        cursor: pointer;
+        transition:
+          transform 0.2s ease,
+          box-shadow 0.2s ease;
+        box-shadow: 0 12px 24px rgba(45, 212, 191, 0.16);
+      }
+      .game-card button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 16px 32px rgba(124, 140, 255, 0.2);
+      }
+      .game-sandbox {
+        display: none;
+        gap: 24px;
+        position: relative;
+        z-index: 1;
+      }
+      .game-sandbox.active {
+        display: grid;
+      }
+      .sandbox-header {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .sandbox-header h2 {
+        font-family: var(--display-font);
+        margin: 0;
+      }
+      .sandbox-header button {
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        padding: 10px 16px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.03);
+        color: var(--text);
+        cursor: pointer;
+      }
+      .telemetry-panel {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(120px, 1fr));
+        gap: 16px;
+      }
+      .telemetry-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+      }
+      .telemetry-card strong {
+        color: var(--muted);
+        font-size: 0.76rem;
+        text-transform: uppercase;
+        letter-spacing: 0.16em;
+      }
+      .telemetry-card span {
+        font-size: 1.28rem;
+      }
+      .game-board {
+        min-height: 420px;
+        background: rgba(255, 255, 255, 0.025);
+        border: 1px solid var(--border);
+        border-radius: 32px;
+        padding: 26px;
+        display: grid;
+        gap: 20px;
+      }
+      .hidden {
+        display: none !important;
+      }
+      .full-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.9);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        z-index: 40;
+      }
+      .full-overlay.active {
+        display: flex;
+      }
+      .summary-card {
+        width: min(760px, 100%);
+        background: linear-gradient(
+          145deg,
+          rgba(16, 22, 38, 0.98),
+          rgba(8, 12, 24, 0.98)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 32px;
+        padding: 28px;
+        display: grid;
+        gap: 20px;
+        box-shadow: var(--shadow);
+      }
+      .summary-card h3 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-family: var(--display-font);
+      }
+      .summary-card p {
+        margin: 0;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+      .summary-grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      }
+      .summary-grid .tile {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        padding: 18px;
+      }
+      .summary-grid .tile strong {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--muted);
+      }
+      .summary-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+      .summary-actions button {
+        border: none;
+        border-radius: 18px;
+        padding: 14px 18px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #fff;
+        cursor: pointer;
+      }
+      .flash-effect {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0;
+        background: radial-gradient(
+          circle at center,
+          rgba(99, 102, 241, 0.2),
+          transparent 35%
+        );
+        transition: opacity 0.25s ease;
+        z-index: 30;
+      }
+      .flash-effect.active {
+        opacity: 1;
+      }
+      .particle {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: rgba(99, 102, 241, 0.85);
+        pointer-events: none;
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.7);
+        transition:
+          opacity 0.25s ease,
+          transform 0.25s ease;
+        z-index: 31;
+      }
+      .particle.show {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.1);
+      }
+      .gamerow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+      .grid-3x3 {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(88px, 1fr));
+        grid-template-rows: repeat(3, minmax(88px, 1fr));
+        gap: 12px;
+        justify-items: stretch;
+        align-items: stretch;
+      }
+      .grid-cell {
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.03);
+        display: grid;
+        place-items: center;
+        transition:
+          transform 0.2s ease,
+          background 0.2s ease,
+          border-color 0.2s ease;
+        position: relative;
+      }
+      .grid-cell.active {
+        background: rgba(99, 102, 241, 0.18);
+        border-color: rgba(99, 102, 241, 0.45);
+        transform: scale(1.02);
+      }
+      .grid-cell span {
+        font-size: 1.1rem;
+        color: var(--text);
+      }
+      .btn-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+      }
+      .control-button {
+        flex: 1 1 140px;
+        border: none;
+        border-radius: 18px;
+        padding: 16px 18px;
+        background: rgba(124, 140, 255, 0.14);
+        color: var(--text);
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          transform 0.15s ease,
+          background 0.2s ease;
+      }
+      .control-button:hover {
+        transform: translateY(-1px);
+        background: rgba(124, 140, 255, 0.2);
+      }
+      .prominent-button {
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #fff;
+      }
+      .streak-badges {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-top: 10px;
+      }
+      .badge {
+        width: 32px;
+        height: 32px;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        color: var(--muted);
+      }
+      .badge.active {
+        background: rgba(16, 185, 129, 0.2);
+        color: #10b981;
+        border-color: rgba(16, 185, 129, 0.35);
+      }
+      .trail-canvas {
+        min-height: 380px;
+        background: rgba(15, 23, 42, 0.95);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 28px;
+        position: relative;
+        overflow: hidden;
+      }
+      .trail-node {
+        position: absolute;
+        width: 62px;
+        height: 62px;
+        border-radius: 50%;
+        border: 2px solid rgba(255, 255, 255, 0.12);
+        display: grid;
+        place-items: center;
+        background: rgba(99, 102, 241, 0.12);
+        color: var(--text);
+        cursor: pointer;
+        transition:
+          transform 0.2s ease,
+          border-color 0.2s ease,
+          background 0.2s ease;
+        user-select: none;
+      }
+      .trail-node.correct {
+        background: rgba(16, 185, 129, 0.18);
+        border-color: rgba(16, 185, 129, 0.5);
+      }
+      .trail-node.error {
+        background: rgba(239, 68, 68, 0.18);
+        border-color: rgba(239, 68, 68, 0.5);
+      }
+      .flanker-window {
+        display: grid;
+        place-items: center;
+        min-height: 120px;
+        border-radius: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        background: linear-gradient(
+          145deg,
+          rgba(124, 140, 255, 0.14),
+          rgba(255, 255, 255, 0.02)
+        );
+        font-size: clamp(3rem, 5vw, 4.5rem);
+        letter-spacing: 0.1em;
+        color: #f8fafc;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+      }
+      @media (max-width: 900px) {
+        .topbar {
+          grid-template-columns: 1fr;
+        }
+        .header-brand {
+          justify-items: start;
+          text-align: left;
+        }
+        .gamerow {
+          flex-direction: column;
+        }
+        .game-board {
+          padding: 18px;
+        }
+        .btn-row {
+          flex-direction: column;
+        }
+        .control-button {
+          width: 100%;
+          flex-basis: auto;
+        }
+        .trail-canvas {
+          min-height: 320px;
+        }
+        .trail-node {
+          width: 50px;
+          height: 50px;
+          font-size: 0.9rem;
+        }
+      }
+      @media (max-width: 700px) {
+        .app-shell {
+          padding: 16px;
+        }
+        .status-panel,
+        .telemetry-panel {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .sandbox-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        .game-card {
+          min-height: auto;
+        }
+        .grid-3x3 {
+          grid-template-columns: repeat(3, minmax(64px, 1fr));
+          grid-template-rows: repeat(3, minmax(64px, 1fr));
+          gap: 10px;
+        }
+        .flanker-window {
+          min-height: 100px;
+          font-size: clamp(2.2rem, 7vw, 3rem);
+        }
+      }
+      @media (max-width: 520px) {
+        .status-panel,
+        .telemetry-panel {
+          grid-template-columns: 1fr;
+        }
+        .main-panel {
+          padding: 16px;
+          border-radius: 24px;
+        }
+        .header-brand {
+          padding: 16px 18px;
+        }
+        .grid-3x3 {
+          grid-template-columns: repeat(3, minmax(54px, 1fr));
+          grid-template-rows: repeat(3, minmax(54px, 1fr));
+          gap: 9px;
+        }
+        .grid-cell span {
+          font-size: 0.95rem;
+        }
+        .trail-canvas {
+          min-height: 280px;
+        }
+        .trail-node {
+          width: 44px;
+          height: 44px;
+          font-size: 0.8rem;
+        }
+        .summary-card {
+          padding: 20px;
+          border-radius: 24px;
+        }
+        .summary-actions {
+          flex-direction: column;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-shell">
+      <div class="topbar">
+        <section class="status-panel">
+          <div class="stat-card">
+            <strong>Current Level</strong><span id="ui-level">1</span>
+          </div>
+          <div class="stat-card">
+            <strong>Total BXP</strong><span id="ui-bxp">0</span>
+          </div>
+          <div class="stat-card">
+            <strong>Active Streak</strong><span id="ui-streak">0</span>
+          </div>
+          <div class="stat-card">
+            <strong>Daily Focus</strong><span id="ui-daily-focus">—</span>
+          </div>
+        </section>
+        <div class="header-brand">
+          <div class="eyebrow">Cognitive lab · adaptive training</div>
+          <h1>NeuroForge Suite</h1>
+          <p>Train memory, focus, and flexibility in one quiet laboratory.</p>
+        </div>
+      </div>
+      <div class="main-panel">
+        <div class="progress-card stat-card" style="padding: 22px">
+          <strong>Progress to next level</strong>
+          <div class="progress-wrapper">
+            <div id="ui-progress" class="progress-bar"></div>
+          </div>
+        </div>
+        <section id="dashboard" class="dashboard-grid"></section>
+        <section id="sandbox" class="game-sandbox"></section>
+      </div>
+    </div>
+    <div id="overlay" class="full-overlay" aria-hidden="true">
+      <div class="summary-card" id="summary-card"></div>
+    </div>
+    <div id="flash" class="flash-effect"></div>
+    <div id="particle" class="particle"></div>
+    <script>
+      const AppState = {
+        user: {
+          id: "player-1",
+          bestScores: {
+            dualNBack: 0,
+            stroop: 0,
+            corsi: 0,
+            trail: 0,
+            flanker: 0,
+          },
+          totalBxp: 0,
+          level: 1,
+          streak: 0,
+          lastActiveDay: null,
+          dailyFocusGame: null,
+          highAccuracyRuns: {
+            dualNBack: 0,
+            stroop: 0,
+            corsi: 0,
+            trail: 0,
+            flanker: 0,
+          },
+          dailyUnlocked: false,
+        },
+        ui: {
+          activeGame: null,
+          gameMode: "dashboard",
+        },
+        games: {},
+        streakBadges: [false, false, false, false, false],
+      };
+
+      const GameManager = {
+        currentGame: null,
+        games: {},
+        init() {
+          this.loadState();
+          this.registerGames();
+          this.applyDailyFocus();
+          this.renderDashboard();
+          this.updateHeader();
+        },
+        registerGames() {
+          this.games = {
+            dualNBack: new DualNBackGame(
+              "dualNBack",
+              "Dual N-Back",
+              "Working Memory & Fluid Intelligence",
+            ),
+            stroop: new StroopGame(
+              "stroop",
+              "Stroop Task",
+              "Selective Attention & Inhibition",
+            ),
+            corsi: new CorsiGame(
+              "corsi",
+              "Corsi Block-Tapping",
+              "Visuospatial Memory",
+            ),
+            trail: new TrailGame(
+              "trail",
+              "Trail Making Test B",
+              "Cognitive Flexibility",
+            ),
+            flanker: new FlankerGame(
+              "flanker",
+              "Eriksen Flanker",
+              "Conflict Resolution & Focus",
+            ),
+          };
+          AppState.games = this.games;
+        },
+        renderDashboard() {
+          const dashboard = document.getElementById("dashboard");
+          dashboard.innerHTML = "";
+          for (const key of Object.keys(this.games)) {
+            const game = this.games[key];
+            const card = document.createElement("article");
+            card.className = "game-card";
+            if (AppState.user.dailyFocusGame === key)
+              card.dataset.focus = "true";
+            card.innerHTML = `<h2>${game.title}</h2>
+            <p>${game.domain}</p>
+            <div class="high-score"><strong>High Score</strong><span>${AppState.user.bestScores[key] || 0}</span></div>
+            <button data-game="${key}">Play</button>`;
+            card
+              .querySelector("button")
+              .addEventListener("click", () => this.openGame(key));
+            dashboard.appendChild(card);
+          }
+        },
+        openGame(gameKey) {
+          AppState.ui.activeGame = gameKey;
+          AppState.ui.gameMode = "sandbox";
+          this.currentGame = this.games[gameKey];
+          document.getElementById("dashboard").classList.add("hidden");
+          const sandbox = document.getElementById("sandbox");
+          sandbox.classList.add("active");
+          sandbox.innerHTML = "";
+          const header = document.createElement("div");
+          header.className = "sandbox-header";
+          header.innerHTML = `<h2>${this.currentGame.title}</h2>
+          <button id="exit-button">Exit to Dashboard</button>`;
+          sandbox.appendChild(header);
+          document
+            .getElementById("exit-button")
+            .addEventListener("click", () => this.exitGame());
+          const telemetry = document.createElement("section");
+          telemetry.className = "telemetry-panel";
+          telemetry.innerHTML = `<div class="telemetry-card"><strong>Score</strong><span id="tele-score">0</span></div>
+          <div class="telemetry-card"><strong>Level</strong><span id="tele-level">0</span></div>
+          <div class="telemetry-card"><strong>Timer / Lives</strong><span id="tele-timer">—</span></div>
+          <div class="telemetry-card"><strong>Game</strong><span>${this.currentGame.title}</span></div>`;
+          sandbox.appendChild(telemetry);
+          const board = document.createElement("section");
+          board.className = "game-board";
+          sandbox.appendChild(board);
+          this.currentGame.mount(board, this.onGameComplete.bind(this));
+          this.currentGame.start();
+        },
+        exitGame() {
+          if (this.currentGame) this.currentGame.stop();
+          AppState.ui.activeGame = null;
+          AppState.ui.gameMode = "dashboard";
+          document.getElementById("dashboard").classList.remove("hidden");
+          document.getElementById("sandbox").classList.remove("active");
+          document.getElementById("sandbox").innerHTML = "";
+          this.updateHeader();
+        },
+        onGameComplete(result) {
+          const xp = this.calculateBxp(
+            result.baseScore,
+            result.accuracy,
+            result.levelReached,
+            result.multiplier,
+          );
+          AppState.user.totalBxp += xp;
+          AppState.user.level =
+            Math.floor(Math.sqrt(AppState.user.totalBxp / 100)) + 1;
+          const key = AppState.ui.activeGame;
+          if (result.score > AppState.user.bestScores[key])
+            AppState.user.bestScores[key] = result.score;
+          if (result.accuracy >= 90) AppState.user.highAccuracyRuns[key] += 1;
+          if (result.accuracy <= 70) AppState.user.highAccuracyRuns[key] = 0;
+          this.saveState();
+          this.showSummary(result, xp);
+          this.flashFeedback();
+          this.spawnParticle();
+          this.updateHeader();
+        },
+        calculateBxp(baseScore, accuracyPct, levelReached, multiplier = 1) {
+          const raw = Math.round(
+            (baseScore * (accuracyPct / 100) + levelReached * 10) * multiplier,
+          );
+          return Math.max(raw, 5);
+        },
+        updateHeader() {
+          document.getElementById("ui-level").textContent = AppState.user.level;
+          document.getElementById("ui-bxp").textContent =
+            AppState.user.totalBxp;
+          document.getElementById("ui-streak").textContent =
+            AppState.user.streak;
+          document.getElementById("ui-daily-focus").textContent =
+            this.games[AppState.user.dailyFocusGame]?.title || "—";
+          const nextThreshold = AppState.user.level ** 2 * 100;
+          const prevThreshold = (AppState.user.level - 1) ** 2 * 100;
+          const progress = Math.min(
+            100,
+            Math.round(
+              ((AppState.user.totalBxp - prevThreshold) /
+                (nextThreshold - prevThreshold)) *
+                100,
+            ),
+          );
+          document.getElementById("ui-progress").style.width = `${progress}%`;
+        },
+        saveState() {
+          localStorage.setItem(
+            "neuroforge-state",
+            JSON.stringify(AppState.user),
+          );
+        },
+        loadState() {
+          const saved = localStorage.getItem("neuroforge-state");
+          if (saved) {
+            try {
+              const parsed = JSON.parse(saved);
+              AppState.user = { ...AppState.user, ...parsed };
+            } catch (error) {
+              console.warn("Could not parse saved state", error);
+            }
+          }
+          this.updateStreak();
+        },
+        updateStreak() {
+          const today = new Date().toISOString().slice(0, 10);
+          if (AppState.user.lastActiveDay === today) return;
+          if (!AppState.user.lastActiveDay) {
+            AppState.user.streak = 1;
+          } else {
+            const prior = new Date(AppState.user.lastActiveDay);
+            const current = new Date(today);
+            const diffDays = Math.round(
+              (current - prior) / (1000 * 60 * 60 * 24),
+            );
+            if (diffDays === 1) AppState.user.streak += 1;
+            else AppState.user.streak = 1;
+          }
+          AppState.user.lastActiveDay = today;
+          AppState.user.streak = Math.max(AppState.user.streak, 1);
+          AppState.user.streakBadges = AppState.user.streakBadges || [
+            false,
+            false,
+            false,
+            false,
+            false,
+          ];
+          for (let i = 0; i < AppState.user.streakBadges.length; i++) {
+            AppState.user.streakBadges[i] = AppState.user.streak >= i + 1;
+          }
+          this.saveState();
+        },
+        applyDailyFocus() {
+          const today = new Date().toISOString().slice(0, 10);
+          if (
+            AppState.user.dailyFocusDay === today &&
+            AppState.user.dailyFocusGame
+          )
+            return;
+          const keys = Object.keys(this.games);
+          const pick = keys[Math.floor(Math.random() * keys.length)];
+          AppState.user.dailyFocusGame = pick;
+          AppState.user.dailyFocusDay = today;
+          this.saveState();
+        },
+        showSummary(result, xp) {
+          const overlay = document.getElementById("overlay");
+          const card = document.getElementById("summary-card");
+          card.innerHTML = `<h3>Game Complete</h3>
+          <p>${this.currentGame.title} has finished. Keep the flow zone alive with every session.</p>
+          <div class="summary-grid">
+            <div class="tile"><strong>Score</strong><span>${result.score}</span></div>
+            <div class="tile"><strong>Accuracy</strong><span>${result.accuracy.toFixed(0)}%</span></div>
+            <div class="tile"><strong>Level Reached</strong><span>${result.levelReached}</span></div>
+            <div class="tile"><strong>BXP Earned</strong><span>${xp}</span></div>
+          </div>
+          <div class="summary-actions">
+            <button id="continue-session">Play Again</button>
+            <button id="back-dashboard">Back to Dashboard</button>
+          </div>`;
+          overlay.classList.add("active");
+          document
+            .getElementById("continue-session")
+            .addEventListener("click", () => {
+              overlay.classList.remove("active");
+              this.currentGame.start();
+            });
+          document
+            .getElementById("back-dashboard")
+            .addEventListener("click", () => {
+              overlay.classList.remove("active");
+              this.exitGame();
+            });
+        },
+        flashFeedback() {
+          const flash = document.getElementById("flash");
+          flash.classList.add("active");
+          setTimeout(() => flash.classList.remove("active"), 260);
+        },
+        spawnParticle() {
+          const particle = document.getElementById("particle");
+          const x = window.innerWidth * (0.2 + Math.random() * 0.6);
+          const y = window.innerHeight * (0.2 + Math.random() * 0.6);
+          particle.style.left = `${x}px`;
+          particle.style.top = `${y}px`;
+          particle.classList.add("show");
+          setTimeout(() => particle.classList.remove("show"), 320);
+        },
+      };
+
+      class DualNBackGame {
+        constructor(key, title, domain) {
+          this.key = key;
+          this.title = title;
+          this.domain = domain;
+          this.container = null;
+          this.onComplete = null;
+          this.trials = 20;
+          this.n = 1;
+          this.sequence = [];
+          this.currentIndex = 0;
+          this.score = 0;
+          this.correct = 0;
+          this.totalPresses = 0;
+          this.activeTimer = null;
+          this.speed = 2500;
+          this.isActive = false;
+          this.multiplier = 1;
+        }
+        mount(container, onComplete) {
+          this.container = container;
+          this.onComplete = onComplete;
+          this.container.innerHTML = `
+          <div class="gamerow">
+            <div class="grid-3x3" id="nback-grid"></div>
+            <div style="flex:1; display:grid; gap:18px;">
+              <div style="display:grid; gap:12px;">
+                <div style="font-size:1.2rem; color:var(--muted);">Dual N-Back controls</div>
+                <div class="btn-row">
+                  <button id="position-match" class="control-button prominent-button">Position Match</button>
+                  <button id="audio-match" class="control-button prominent-button">Audio Match</button>
+                </div>
+                <div style="display:grid; gap:12px;">
+                  <div><strong style="color:var(--muted);">N Level</strong> <span id="nback-level">1</span></div>
+                  <div><strong style="color:var(--muted);">Sequence</strong> <span id="nback-progress">0 / 20</span></div>
+                  <div><strong style="color:var(--muted);">Accuracy</strong> <span id="nback-accuracy">0%</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+          this.gridEl = this.container.querySelector("#nback-grid");
+          this.levelEl = this.container.querySelector("#nback-level");
+          this.progressEl = this.container.querySelector("#nback-progress");
+          this.accuracyEl = this.container.querySelector("#nback-accuracy");
+          ["position-match", "audio-match"].forEach((id) => {
+            this.container
+              .querySelector(`#${id}`)
+              .addEventListener("click", () =>
+                this.registerResponse(
+                  id === "position-match" ? "position" : "audio",
+                ),
+              );
+          });
+          this.createGrid();
+        }
+        createGrid() {
+          this.gridEl.innerHTML = "";
+          for (let i = 0; i < 9; i++) {
+            const cell = document.createElement("div");
+            cell.className = "grid-cell";
+            cell.dataset.index = i;
+            cell.innerHTML = `<span>${i + 1}</span>`;
+            this.gridEl.appendChild(cell);
+          }
+        }
+        start() {
+          this.reset();
+          this.isActive = true;
+          this.prepareSequence();
+          this.spawnTrial();
+          this.scheduleNextTrial();
+        }
+        stop() {
+          this.isActive = false;
+          if (this.activeTimer) clearTimeout(this.activeTimer);
+        }
+        reset() {
+          this.sequence = [];
+          this.currentIndex = 0;
+          this.score = 0;
+          this.correct = 0;
+          this.totalPresses = 0;
+          this.activeIndex = -1;
+          this.speed = 2500;
+          this.updateTelemetry();
+        }
+        prepareSequence() {
+          const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+          for (let i = 0; i < this.trials; i++) {
+            const position = Math.floor(Math.random() * 9);
+            const letter = letters[Math.floor(Math.random() * letters.length)];
+            this.sequence.push({ position, letter });
+          }
+        }
+        scheduleNextTrial() {
+          if (!this.isActive) return;
+          this.activeTimer = setTimeout(() => {
+            this.currentIndex += 1;
+            if (this.currentIndex >= this.trials) {
+              return this.finish();
+            }
+            this.spawnTrial();
+            this.scheduleNextTrial();
+          }, this.speed);
+        }
+        spawnTrial() {
+          this.clearGrid();
+          const item = this.sequence[this.currentIndex];
+          this.activeIndex = item.position;
+          const cell = this.gridEl.querySelector(
+            `[data-index="${item.position}"]`,
+          );
+          if (cell) cell.classList.add("active");
+          this.speak(item.letter);
+          this.updateTelemetry();
+        }
+        clearGrid() {
+          this.gridEl
+            .querySelectorAll(".grid-cell")
+            .forEach((node) => node.classList.remove("active"));
+        }
+        speak(letter) {
+          if (!window.speechSynthesis) return;
+          const utterance = new SpeechSynthesisUtterance(letter);
+          utterance.rate = 1.1;
+          utterance.pitch = 1.2;
+          window.speechSynthesis.cancel();
+          window.speechSynthesis.speak(utterance);
+        }
+        registerResponse(type) {
+          if (!this.isActive || this.currentIndex === 0) return;
+          const targetIndex = this.currentIndex - this.n;
+          const actual = this.sequence[targetIndex];
+          const current = this.sequence[this.currentIndex];
+          const matched =
+            type === "position"
+              ? actual.position === current.position
+              : actual.letter === current.letter;
+          this.totalPresses += 1;
+          if (matched) {
+            this.correct += 1;
+            this.animateCell(this.activeIndex, true);
+          } else {
+            this.animateCell(this.activeIndex, false);
+          }
+          this.score += matched ? 10 : 0;
+          this.updateTelemetry();
+        }
+        animateCell(index, success) {
+          const cell = this.gridEl.querySelector(`[data-index="${index}"]`);
+          if (!cell) return;
+          cell.style.transform = success ? "scale(1.08)" : "scale(0.96)";
+          cell.style.background = success
+            ? "rgba(16,185,129,0.2)"
+            : "rgba(239,68,68,0.2)";
+          setTimeout(() => {
+            cell.style.transform = "";
+            cell.style.background = "";
+          }, 260);
+        }
+        updateTelemetry() {
+          document.getElementById("tele-score").textContent = this.score;
+          document.getElementById("tele-level").textContent = this.n;
+          document.getElementById("tele-timer").textContent =
+            `${this.currentIndex}/${this.trials}`;
+          this.levelEl.textContent = this.n;
+          this.progressEl.textContent = `${Math.min(this.currentIndex, this.trials)}/${this.trials}`;
+          const accuracy = this.totalPresses
+            ? (this.correct / this.totalPresses) * 100
+            : 0;
+          this.accuracyEl.textContent = `${Math.round(accuracy)}%`;
+        }
+        finish() {
+          this.isActive = false;
+          this.clearGrid();
+          const accuracy = this.totalPresses
+            ? (this.correct / this.totalPresses) * 100
+            : 0;
+          if (accuracy > 80 && this.n < 3) this.n += 1;
+          if (accuracy < 50 && this.n > 1) this.n -= 1;
+          const multiplier =
+            AppState.user.dailyFocusGame === this.key ? 1.5 : 1;
+          this.onComplete({
+            score: this.score,
+            accuracy,
+            levelReached: this.n,
+            baseScore: this.score,
+            multiplier,
+          });
+        }
+      }
+
+      class StroopGame {
+        constructor(key, title, domain) {
+          this.key = key;
+          this.title = title;
+          this.domain = domain;
+          this.container = null;
+          this.onComplete = null;
+          this.words = ["RED", "BLUE", "GREEN", "YELLOW"];
+          this.colors = ["red", "blue", "green", "yellow"];
+          this.sequence = [];
+          this.current = 0;
+          this.score = 0;
+          this.correct = 0;
+          this.total = 0;
+          this.timeLimit = 2000;
+          this.timerId = null;
+          this.isActive = false;
+        }
+        mount(container, onComplete) {
+          this.container = container;
+          this.onComplete = onComplete;
+          this.container.innerHTML = `
+          <div style="display:grid;gap:22px;">
+            <div class="flanker-window" id="stroop-target">READY</div>
+            <div style="display:grid; gap:12px;">
+              <div style="display:grid; gap:8px; color:var(--muted);">
+                <div><strong>Response timer</strong> <span id="stroop-timer">2.0s</span></div>
+                <div><strong>Streak</strong> <span id="stroop-run">0</span></div>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button class="control-button prominent-button" data-color="red">Red</button>
+              <button class="control-button prominent-button" data-color="blue">Blue</button>
+              <button class="control-button prominent-button" data-color="green">Green</button>
+              <button class="control-button prominent-button" data-color="yellow">Yellow</button>
+            </div>
+          </div>
+        `;
+          this.sequenceBox = this.container.querySelector("#stroop-target");
+          this.timerBox = this.container.querySelector("#stroop-timer");
+          this.runBox = this.container.querySelector("#stroop-run");
+          this.container.querySelectorAll("[data-color]").forEach((button) => {
+            button.addEventListener("click", () =>
+              this.evaluateResponse(button.dataset.color),
+            );
+          });
+        }
+        start() {
+          this.reset();
+          this.isActive = true;
+          this.scheduleTrial();
+        }
+        stop() {
+          this.isActive = false;
+          if (this.timerId) clearTimeout(this.timerId);
+        }
+        reset() {
+          this.sequence = [];
+          this.current = 0;
+          this.score = 0;
+          this.correct = 0;
+          this.total = 0;
+          this.timeLimit = 2000;
+          this.updateTelemetry();
+        }
+        scheduleTrial() {
+          if (!this.isActive || this.current >= 20) return this.finish();
+          this.presentStimulus();
+        }
+        presentStimulus() {
+          const word =
+            this.words[Math.floor(Math.random() * this.words.length)];
+          const inkColor =
+            this.colors[Math.floor(Math.random() * this.colors.length)];
+          this.sequence[this.current] = { word, inkColor };
+          this.sequenceBox.textContent = word;
+          this.sequenceBox.style.color = inkColor;
+          this.timerBox.textContent = `${(this.timeLimit / 1000).toFixed(2)}s`;
+          this.activeDeadline = Date.now() + this.timeLimit;
+          this.timerId = setTimeout(() => this.registerMiss(), this.timeLimit);
+        }
+        evaluateResponse(chosenColor) {
+          if (!this.isActive || this.current >= 20) return;
+          clearTimeout(this.timerId);
+          const trial = this.sequence[this.current];
+          const correct = trial.inkColor === chosenColor;
+          this.total += 1;
+          if (correct) {
+            this.correct += 1;
+            this.score += 12;
+            this.timeLimit = Math.max(750, this.timeLimit - 80);
+            this.flashButton(chosenColor, true);
+          } else {
+            this.score = Math.max(0, this.score - 6);
+            this.timeLimit = Math.min(2000, this.timeLimit + 100);
+            this.flashButton(chosenColor, false);
+          }
+          this.current += 1;
+          this.updateTelemetry();
+          setTimeout(() => this.scheduleTrial(), 180);
+        }
+        registerMiss() {
+          if (!this.isActive) return;
+          this.total += 1;
+          this.current += 1;
+          this.timeLimit = Math.min(2000, this.timeLimit + 100);
+          this.updateTelemetry();
+          this.scheduleTrial();
+        }
+        flashButton(color, success) {
+          const button = this.container.querySelector(
+            `[data-color="${color}"]`,
+          );
+          if (!button) return;
+          button.style.transform = success ? "scale(1.05)" : "scale(0.96)";
+          button.style.backgroundColor = success
+            ? "rgba(16,185,129,0.25)"
+            : "rgba(239,68,68,0.22)";
+          setTimeout(() => {
+            button.style.transform = "";
+            button.style.backgroundColor = "";
+          }, 220);
+        }
+        updateTelemetry() {
+          document.getElementById("tele-score").textContent = this.score;
+          document.getElementById("tele-level").textContent =
+            Math.round((2000 - this.timeLimit) / 80) + 1;
+          document.getElementById("tele-timer").textContent =
+            `${(this.timeLimit / 1000).toFixed(2)}s`;
+          this.timerBox.textContent = `${(this.timeLimit / 1000).toFixed(2)}s`;
+          this.runBox.textContent = `${this.correct} / ${this.total}`;
+        }
+        finish() {
+          this.isActive = false;
+          const accuracy = this.total ? (this.correct / this.total) * 100 : 0;
+          const levelReached = Math.round((2000 - this.timeLimit) / 80) + 1;
+          const multiplier =
+            AppState.user.dailyFocusGame === this.key ? 1.5 : 1;
+          this.onComplete({
+            score: this.score,
+            accuracy,
+            levelReached,
+            baseScore: this.score,
+            multiplier,
+          });
+        }
+      }
+
+      class CorsiGame {
+        constructor(key, title, domain) {
+          this.key = key;
+          this.title = title;
+          this.domain = domain;
+          this.container = null;
+          this.onComplete = null;
+          this.sequence = [];
+          this.current = 0;
+          this.level = 1;
+          this.score = 0;
+          this.lives = 3;
+          this.isActive = false;
+          this.board = null;
+        }
+        mount(container, onComplete) {
+          this.container = container;
+          this.onComplete = onComplete;
+          this.container.innerHTML = `
+          <div style="display:grid;gap:20px;">
+            <div style="display:grid;gap:14px;"><div><strong style="color:var(--muted);">Sequence length</strong> <span id="corsi-length">3</span></div>
+            <div><strong style="color:var(--muted);">Lives</strong> <span id="corsi-lives">3</span></div>
+            <div><strong style="color:var(--muted);">Status</strong> <span id="corsi-status">Watch closely</span></div></div>
+            <div class="gamerow"><div id="corsi-board" class="grid-3x3"></div></div>
+          </div>
+        `;
+          this.board = this.container.querySelector("#corsi-board");
+          this.lengthBox = this.container.querySelector("#corsi-length");
+          this.livesBox = this.container.querySelector("#corsi-lives");
+          this.statusBox = this.container.querySelector("#corsi-status");
+          this.createCells();
+        }
+        createCells() {
+          this.board.innerHTML = "";
+          for (let i = 1; i <= 9; i++) {
+            const tile = document.createElement("div");
+            tile.className = "grid-cell";
+            tile.dataset.value = i;
+            tile.innerHTML = `<span>${i}</span>`;
+            tile.addEventListener("click", () => this.attemptTile(i));
+            this.board.appendChild(tile);
+          }
+        }
+        start() {
+          this.isActive = true;
+          this.sequence = [];
+          this.current = 0;
+          this.score = 0;
+          this.lives = 3;
+          this.level = 1;
+          this.nextRound();
+        }
+        stop() {
+          this.isActive = false;
+        }
+        nextRound() {
+          if (!this.isActive) return;
+          this.sequence = [];
+          for (let i = 0; i < this.level + 2; i++) {
+            this.sequence.push(Math.floor(Math.random() * 9) + 1);
+          }
+          this.current = 0;
+          this.lengthBox.textContent = this.sequence.length;
+          this.livesBox.textContent = this.lives;
+          this.statusBox.textContent = "Watching sequence";
+          this.revealSequence(0);
+        }
+        revealSequence(index) {
+          if (!this.isActive) return;
+          if (index >= this.sequence.length) {
+            this.statusBox.textContent = "Your Turn!";
+            return;
+          }
+          const value = this.sequence[index];
+          const tile = this.board.querySelector(`[data-value="${value}"]`);
+          if (!tile) return;
+          tile.classList.add("active");
+          setTimeout(() => {
+            tile.classList.remove("active");
+            setTimeout(() => this.revealSequence(index + 1), 260);
+          }, 500);
+        }
+        attemptTile(value) {
+          if (!this.isActive || this.current >= this.sequence.length) return;
+          const correct = this.sequence[this.current] === value;
+          const tile = this.board.querySelector(`[data-value="${value}"]`);
+          if (correct) {
+            this.score += 15;
+            this.current += 1;
+            tile.classList.add("active");
+            tile.style.background = "rgba(16,185,129,0.18)";
+            setTimeout(() => {
+              tile.classList.remove("active");
+              tile.style.background = "";
+              if (this.current === this.sequence.length) this.advanceLevel();
+            }, 240);
+          } else {
+            this.lives -= 1;
+            tile.classList.add("error");
+            tile.style.background = "rgba(239,68,68,0.18)";
+            setTimeout(() => {
+              tile.classList.remove("error");
+              tile.style.background = "";
+              this.resetRound();
+            }, 260);
+          }
+          this.updateTelemetry();
+        }
+        advanceLevel() {
+          this.score += 40;
+          this.level += 1;
+          this.nextRound();
+        }
+        resetRound() {
+          this.current = 0;
+          this.statusBox.textContent = "Sequence reset";
+          if (this.lives <= 0) return this.finish();
+          setTimeout(() => this.nextRound(), 420);
+        }
+        updateTelemetry() {
+          document.getElementById("tele-score").textContent = this.score;
+          document.getElementById("tele-level").textContent = this.level;
+          document.getElementById("tele-timer").textContent =
+            `${this.lives} lives`;
+          this.livesBox.textContent = this.lives;
+        }
+        finish() {
+          this.isActive = false;
+          const accuracy =
+            this.level > 1
+              ? 100
+              : (this.current / (this.sequence.length || 1)) * 100;
+          const multiplier =
+            AppState.user.dailyFocusGame === this.key ? 1.5 : 1;
+          this.onComplete({
+            score: this.score,
+            accuracy,
+            levelReached: this.level,
+            baseScore: this.score,
+            multiplier,
+          });
+        }
+      }
+
+      class TrailGame {
+        constructor(key, title, domain) {
+          this.key = key;
+          this.title = title;
+          this.domain = domain;
+          this.container = null;
+          this.onComplete = null;
+          this.nodes = [];
+          this.targetSequence = [];
+          this.currentIndex = 0;
+          this.score = 0;
+          this.time = 0;
+          this.timerId = null;
+          this.isActive = false;
+          this.maxPoints = 26;
+        }
+        mount(container, onComplete) {
+          this.container = container;
+          this.onComplete = onComplete;
+          this.container.innerHTML = `
+          <div style="display:grid;gap:18px;">
+            <div style="display:grid; gap:12px;">
+              <div><strong style="color:var(--muted);">Nodes</strong> <span id="trail-count">0</span></div>
+              <div><strong style="color:var(--muted);">Time</strong> <span id="trail-timer">0.0s</span></div>
+            </div>
+            <div class="trail-canvas" id="trail-canvas"></div>
+          </div>
+        `;
+          this.canvas = this.container.querySelector("#trail-canvas");
+          this.countBox = this.container.querySelector("#trail-count");
+          this.timerBox = this.container.querySelector("#trail-timer");
+        }
+        start() {
+          this.isActive = true;
+          this.currentIndex = 0;
+          this.score = 0;
+          this.time = 0;
+          this.levelNodes = 12;
+          this.initializeBoard();
+          this.startTimer();
+        }
+        stop() {
+          this.isActive = false;
+          if (this.timerId) clearInterval(this.timerId);
+        }
+        initializeBoard() {
+          this.targetSequence = [];
+          const numeric = Math.ceil(this.levelNodes / 2);
+          const letters = Math.floor(this.levelNodes / 2);
+          this.nodes = [];
+          for (let i = 1; i <= numeric; i++)
+            this.nodes.push({
+              id: `${i}`,
+              label: `${i}`,
+              order: (i - 1) * 2 + 1,
+            });
+          for (let i = 0; i < letters; i++)
+            this.nodes.push({
+              id: `L${i + 1}`,
+              label: String.fromCharCode(65 + i),
+              order: (i + 1) * 2,
+            });
+          this.nodes.sort(() => Math.random() - 0.5);
+          this.targetSequence = [...this.nodes].sort(
+            (a, b) => a.order - b.order,
+          );
+          this.renderNodes();
+          this.countBox.textContent = this.nodes.length;
+        }
+        renderNodes() {
+          this.canvas.innerHTML = "";
+          const padding = 30;
+          this.nodes.forEach((node) => {
+            const element = document.createElement("div");
+            element.className = "trail-node";
+            const x =
+              padding +
+              Math.random() * (this.canvas.clientWidth - padding * 2 - 62);
+            const y =
+              padding +
+              Math.random() * (this.canvas.clientHeight - padding * 2 - 62);
+            element.style.left = `${x}px`;
+            element.style.top = `${y}px`;
+            element.textContent = node.label;
+            element.dataset.nodeId = node.id;
+            element.addEventListener("click", () =>
+              this.hitNode(node.id, element),
+            );
+            this.canvas.appendChild(element);
+          });
+        }
+        startTimer() {
+          if (this.timerId) clearInterval(this.timerId);
+          this.timerId = setInterval(() => {
+            this.time += 0.1;
+            this.timerBox.textContent = `${this.time.toFixed(1)}s`;
+          }, 100);
+        }
+        hitNode(id, element) {
+          if (!this.isActive) return;
+          const expected = this.targetSequence[this.currentIndex];
+          const chosen = this.nodes.find((node) => node.id === id);
+          if (!chosen) return;
+          if (chosen.order === expected.order) {
+            this.score += 20;
+            this.currentIndex += 1;
+            element.classList.add("correct");
+            setTimeout(() => element.classList.remove("correct"), 260);
+            if (this.currentIndex === this.targetSequence.length)
+              return this.successRound();
+          } else {
+            this.score = Math.max(0, this.score - 10);
+            element.classList.add("error");
+            setTimeout(() => element.classList.remove("error"), 260);
+            this.time += 1.0;
+          }
+          document.getElementById("tele-score").textContent = this.score;
+        }
+        successRound() {
+          this.levelNodes = Math.min(this.maxPoints, this.levelNodes + 2);
+          this.currentIndex = 0;
+          this.initializeBoard();
+        }
+        updateTelemetry() {
+          document.getElementById("tele-score").textContent = this.score;
+          document.getElementById("tele-level").textContent =
+            this.targetSequence.length;
+          document.getElementById("tele-timer").textContent =
+            `${this.time.toFixed(1)}s`;
+        }
+        finish() {
+          this.isActive = false;
+          if (this.timerId) clearInterval(this.timerId);
+          const accuracy =
+            (this.currentIndex / (this.targetSequence.length || 1)) * 100;
+          const multiplier =
+            AppState.user.dailyFocusGame === this.key ? 1.5 : 1;
+          this.onComplete({
+            score: this.score,
+            accuracy,
+            levelReached: this.targetSequence.length,
+            baseScore: this.score,
+            multiplier,
+          });
+        }
+      }
+
+      class FlankerGame {
+        constructor(key, title, domain) {
+          this.key = key;
+          this.title = title;
+          this.domain = domain;
+          this.container = null;
+          this.onComplete = null;
+          this.timeRemaining = 60;
+          this.score = 0;
+          this.correct = 0;
+          this.total = 0;
+          this.intervalId = null;
+          this.currentStimulus = "";
+          this.isActive = false;
+        }
+        mount(container, onComplete) {
+          this.container = container;
+          this.onComplete = onComplete;
+          this.container.innerHTML = `
+          <div style="display:grid;gap:20px;">
+            <div class="flanker-window" id="flanker-display">&gt;&gt;&gt;&gt;&gt;</div>
+            <div style="display:grid; gap:12px;"><div><strong style="color:var(--muted);">Time left</strong> <span id="flanker-clock">60.0s</span></div>
+            <div><strong style="color:var(--muted);">Streak</strong> <span id="flanker-run">0 / 0</span></div></div>
+            <div class="btn-row">
+              <button class="control-button prominent-button" id="flanker-left">Left</button>
+              <button class="control-button prominent-button" id="flanker-right">Right</button>
+            </div>
+          </div>
+        `;
+          this.display = this.container.querySelector("#flanker-display");
+          this.clock = this.container.querySelector("#flanker-clock");
+          this.runBox = this.container.querySelector("#flanker-run");
+          this.container
+            .querySelector("#flanker-left")
+            .addEventListener("click", () => this.submitAnswer("left"));
+          this.container
+            .querySelector("#flanker-right")
+            .addEventListener("click", () => this.submitAnswer("right"));
+        }
+        start() {
+          this.isActive = true;
+          this.timeRemaining = 60;
+          this.score = 0;
+          this.correct = 0;
+          this.total = 0;
+          this.startClock();
+          this.changeStimulus();
+        }
+        stop() {
+          this.isActive = false;
+          if (this.intervalId) clearInterval(this.intervalId);
+        }
+        startClock() {
+          if (this.intervalId) clearInterval(this.intervalId);
+          this.intervalId = setInterval(() => {
+            if (!this.isActive) return;
+            this.timeRemaining = Math.max(0, this.timeRemaining - 0.1);
+            this.clock.textContent = `${this.timeRemaining.toFixed(1)}s`;
+            if (this.timeRemaining <= 0) {
+              this.stop();
+              this.finish();
+            }
+          }, 100);
+        }
+        changeStimulus() {
+          if (!this.isActive) return;
+          const direction = Math.random() > 0.5 ? "left" : "right";
+          const congruent = Math.random() > 0.35;
+          const arrow = direction === "right" ? ">" : "<";
+          const alt = direction === "right" ? "<" : ">";
+          this.currentStimulus = `${alt}${alt}${arrow}${alt}${alt}`;
+          if (congruent)
+            this.currentStimulus = `${arrow}${arrow}${arrow}${arrow}${arrow}`;
+          this.display.textContent = this.currentStimulus;
+        }
+        submitAnswer(choice) {
+          if (!this.isActive) return;
+          const center = this.currentStimulus[2] === ">" ? "right" : "left";
+          const correct = choice === center;
+          this.total += 1;
+          if (correct) {
+            this.correct += 1;
+            this.score += 14;
+            this.timeRemaining += 0.8;
+            this.flashDisplay(true);
+          } else {
+            this.score = Math.max(0, this.score - 8);
+            this.timeRemaining = Math.max(0, this.timeRemaining - 3);
+            this.flashDisplay(false);
+          }
+          this.runBox.textContent = `${this.correct} / ${this.total}`;
+          this.clock.textContent = `${this.timeRemaining.toFixed(1)}s`;
+          this.changeStimulus();
+        }
+        flashDisplay(success) {
+          this.display.style.background = success
+            ? "rgba(16,185,129,0.16)"
+            : "rgba(239,68,68,0.18)";
+          setTimeout(
+            () => (this.display.style.background = "rgba(255,255,255,0.02)"),
+            220,
+          );
+        }
+        finish() {
+          this.isActive = false;
+          const accuracy = this.total ? (this.correct / this.total) * 100 : 0;
+          const multiplier =
+            AppState.user.dailyFocusGame === this.key ? 1.5 : 1;
+          this.onComplete({
+            score: this.score,
+            accuracy,
+            levelReached: Math.round(this.timeRemaining),
+            baseScore: this.score,
+            multiplier,
+          });
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        GameManager.init();
+      });
+    </script>
+  </body>
+</html>
